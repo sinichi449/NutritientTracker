@@ -18,28 +18,33 @@ class HomeViewModel(
     private val userProfileRepository: UserProfileRepository,
 ): ViewModel() {
 
-    // Define calorie and macro goals
-    private val calorieGoal = 2200
-    private val carbsGoal = 220.0 // 40% of 2200 kcal
-    private val proteinGoal = 192.5 // 35% of 2200 kcal
-    private val fatGoal = 61.1 // 25% of 2200 kcal
-
     // Get a flow of today's food items from the repository
     private val todaysFoodFlow = foodRepository.getFoodItemsForDay(System.currentTimeMillis())
 
     // Get a flow of the 10 most recent food items
     private val recentFoodsFlow = foodRepository.getRecentFoodItems(10)
 
+    // Get the user profile flow
+    private val userProfileFlow = userProfileRepository.getUserProfile()
+
     // Combine the flows to create the final UI state
     val uiState: StateFlow<HomeUiState> = combine(
         todaysFoodFlow,
-        recentFoodsFlow
-    ) { todaysFood, recentFoods ->
+        recentFoodsFlow,
+        userProfileFlow,
+    ) { todaysFood, recentFoods, userProfile ->
         // Calculate totals from today's food list
         val caloriesConsumed = todaysFood.sumOf { it.calories }
         val carbsConsumed = todaysFood.sumOf { it.carbs }
         val proteinConsumed = todaysFood.sumOf { it.protein }
         val fatConsumed = todaysFood.sumOf { it.fat }
+
+        // Calculate goals based on user profile
+        val calorieGoal = userProfile.dailyGoalKcal
+        val carbsGoal = (calorieGoal * (userProfile.carbPercentage.toDouble() / 100))
+        val proteinGoal = (calorieGoal * (userProfile.proteinPercentage.toDouble() / 100))
+        val fatGoal = (calorieGoal * (userProfile.fatPercentage.toDouble() / 100))
+
 
         // Create the list of macronutrient info
         val macros = listOf(

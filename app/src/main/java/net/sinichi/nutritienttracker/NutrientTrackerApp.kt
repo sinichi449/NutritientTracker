@@ -22,7 +22,9 @@ class NutrientTrackerApp : Application() {
             applicationContext,
             AppDatabase::class.java,
             "nutrient_tracker_db"
-        ).build()
+        )
+            .fallbackToDestructiveMigration(true)
+            .build()
 
         // Initialize the repository
         foodRepository = FoodRepositoryLocalImpl(database.foodDao())
