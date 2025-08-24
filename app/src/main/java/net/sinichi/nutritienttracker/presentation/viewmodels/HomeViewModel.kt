@@ -48,9 +48,9 @@ class HomeViewModel(
 
         // Create the list of macronutrient info
         val macros = listOf(
-            MacroNutrientInfo("Carbs", carbsConsumed, carbsGoal),
-            MacroNutrientInfo("Fat", fatConsumed, fatGoal),
-            MacroNutrientInfo("Protein", proteinConsumed, proteinGoal)
+            MacroNutrientInfo("Kabohidrat", carbsConsumed, carbsGoal),
+            MacroNutrientInfo("Protein", proteinConsumed, proteinGoal),
+            MacroNutrientInfo("Lemak", fatConsumed, fatGoal),
         )
 
         // Return the complete UI state object

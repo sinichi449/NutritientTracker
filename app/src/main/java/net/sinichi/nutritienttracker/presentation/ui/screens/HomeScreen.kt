@@ -149,7 +149,7 @@ fun NutritientTrackerHeader() {
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    text = "Live healthier, live happier.",
+                    text = "Mangan sing akeh cok, ben ndang lemu :v",
                     fontSize = 12.sp,
                     // Use theme color for secondary text
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -220,7 +220,27 @@ fun DailyIntakeCard(progress: Float, consumed: Int, goal: Int) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text("⚡ Daily intake", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                // Determine the progress text based on the progress value
+                val progressPercentage = (progress * 100).toInt() // Convert progress (0.0-1.0) to percentage (0-100)
+
+                val progressText = when (progressPercentage) {
+                    in 0..10 -> "🥴 Niat Poso?"
+                    in 11..30 -> "😤 Kurang mbut"
+                    in 31..60 -> "⚡ Gas teruss"
+                    in 61..85 -> "😍 Ayo yang"
+                    in 86..95 -> "😉 Jatah malam"
+                    in 96..99 -> "🥰 Ihh Gemess"
+                    100 -> "🙈 Atutuh"
+                    else -> {
+                        // Optional: Handle cases outside 0-100, though progress should ideally be clamped.
+                        // If progress can exceed 100%, you might want a specific message for that too.
+                        // For now, let's assume progress is capped at 100 for these messages.
+                        // If it can go above, the last defined message (100%) or a new one would apply.
+                        if (progressPercentage > 100) "🎉 Luar Binasa!" else " memulai..." // Default or for > 100%
+                    }
+                }
+
+                Text(progressText, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Text(
                     text = "${(progress * 100).toInt()}%",
                     fontSize = 48.sp,
@@ -368,51 +388,6 @@ fun MacroNutrientBar(info: MacroNutrientInfo) {
 }
 
 @Composable
-fun RecentFoodsCard(
-    recentFoods: List<FoodItem>,
-    onDeleteItem: (FoodItem) -> Unit,
-    onEditItem: (String) -> Unit,
-) {
-    Card(
-        // Added clickable modifier
-        modifier = Modifier.clickable { /* TODO: Handle navigation to recent foods list */ },
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("🍽️ Recent Foods", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Go to details",
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-            HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.surfaceContainer)
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (recentFoods.isEmpty()) {
-                // TODO
-            } else {
-                Column {
-                    recentFoods.forEach { foodItem ->
-                        RecentFoodItemRow(
-                            item = foodItem,
-                            onDelete = { onDeleteItem(foodItem) },
-                            onEdit = { onEditItem(foodItem.id) }
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun RecentFoodItemRow(
     item: FoodItem,
     onDelete: () -> Unit,
@@ -492,14 +467,15 @@ fun RecentFoodItemRow(
 }
 
 @Composable
-fun RecentFoodsHeader() {
+fun RecentFoodsHeader(onClick: () -> Unit = {}) {
     Card(
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        modifier = Modifier.clickable(onClick = onClick)
     ) {
         Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("🍽️ Recent Foods", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text("🍽️ Terbadog hari ini", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowForward,
