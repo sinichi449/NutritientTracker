@@ -19,7 +19,8 @@ class FoodRepositoryLocalImpl(
 
     override fun getRecentFoodItems(limit: Int): Flow<List<FoodItem>> {
         return dao.getAllFoodItems().map { list ->
-            list.take(limit).map { it.toDomain() } // Convert back to core entity
+            // Map to the core FoodItem entity here
+            list.take(limit).map { it.toDomain() }
         }
     }
 

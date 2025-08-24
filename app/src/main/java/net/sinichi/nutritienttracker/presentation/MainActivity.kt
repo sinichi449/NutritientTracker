@@ -36,9 +36,9 @@ class MainActivity : ComponentActivity() {
                     )
 
                     // Collect the UI state as a Compose state
-                    val uiState by viewModel.uiState.collectAsState()
+                    val homeUiState by viewModel.uiState.collectAsState()
 
-                    HomeScreen(uiState)
+                    HomeScreen(homeUiState)
                 }
             }
         }
