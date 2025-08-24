@@ -4,10 +4,14 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [FoodItemEntity::class],
-    version = 1,
+    entities = [
+        FoodItemEntity::class,
+        UserProfileEntity::class
+   ],
+    version = 2,
     exportSchema = true
 )
 abstract class AppDatabase: RoomDatabase() {
     abstract fun foodDao(): FoodDao
+    abstract fun userProfileDao(): UserProfileDao
 }

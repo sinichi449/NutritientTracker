@@ -119,7 +119,10 @@ class MainActivity : ComponentActivity() {
                 }
 
                 // This factory is now only for ViewModels without arguments
-                val viewModelFactory = ViewModelFactory(application.foodRepository)
+                val viewModelFactory = ViewModelFactory(
+                    application.foodRepository,
+                    application.userProfileRepository,
+                )
 
                 Scaffold(
                     bottomBar = {

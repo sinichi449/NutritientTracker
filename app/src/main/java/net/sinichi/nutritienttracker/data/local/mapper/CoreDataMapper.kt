@@ -2,8 +2,10 @@ package net.sinichi.nutritienttracker.data.local.mapper
 
 // Import the core domain entity
 import net.sinichi.nutritienttracker.core.entities.FoodItem
+import net.sinichi.nutritienttracker.core.entities.UserProfile
 // Import the local database entity
 import net.sinichi.nutritienttracker.data.local.FoodItemEntity
+import net.sinichi.nutritienttracker.data.local.UserProfileEntity
 
 /**
  * Converts a database [FoodItemEntity] to a domain [FoodItem].
@@ -36,6 +38,20 @@ fun FoodItem.toEntity(): FoodItemEntity {
         timestamp = this.timestamp
     )
 }
+
+fun UserProfileEntity.toDomain() = UserProfile(
+    dailyGoalKcal = this.dailyGoalKcal,
+    carbPercentage = this.carbPercentage,
+    proteinPercentage = this.proteinPercentage,
+    fatPercentage = this.fatPercentage
+)
+
+fun UserProfile.toEntity() = UserProfileEntity(
+    dailyGoalKcal = this.dailyGoalKcal,
+    carbPercentage = this.carbPercentage,
+    proteinPercentage = this.proteinPercentage,
+    fatPercentage = this.fatPercentage
+)
 
 // Optional: List mappers also reside here
 fun List<FoodItemEntity>.toDomain(): List<FoodItem> {

@@ -10,10 +10,12 @@ import kotlinx.coroutines.launch
 import net.sinichi.nutritienttracker.core.entities.FoodItem
 import net.sinichi.nutritienttracker.core.entities.MacroNutrientInfo
 import net.sinichi.nutritienttracker.core.repositories.FoodRepository
+import net.sinichi.nutritienttracker.core.repositories.UserProfileRepository
 import net.sinichi.nutritienttracker.presentation.states.HomeUiState
 
 class HomeViewModel(
-    private val repository: FoodRepository
+    private val foodRepository: FoodRepository,
+    private val userProfileRepository: UserProfileRepository,
 ): ViewModel() {
 
     // Define calorie and macro goals
@@ -23,10 +25,10 @@ class HomeViewModel(
     private val fatGoal = 61.1 // 25% of 2200 kcal
 
     // Get a flow of today's food items from the repository
-    private val todaysFoodFlow = repository.getFoodItemsForDay(System.currentTimeMillis())
+    private val todaysFoodFlow = foodRepository.getFoodItemsForDay(System.currentTimeMillis())
 
     // Get a flow of the 10 most recent food items
-    private val recentFoodsFlow = repository.getRecentFoodItems(10)
+    private val recentFoodsFlow = foodRepository.getRecentFoodItems(10)
 
     // Combine the flows to create the final UI state
     val uiState: StateFlow<HomeUiState> = combine(
@@ -63,7 +65,7 @@ class HomeViewModel(
 
     fun deleteFoodItem(item: FoodItem) {
         viewModelScope.launch {
-            repository.deleteFoodItem(item)
+            foodRepository.deleteFoodItem(item)
         }
     }
 }
