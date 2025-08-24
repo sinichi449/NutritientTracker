@@ -1,5 +1,6 @@
 package net.sinichi.nutritienttracker.presentation
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -36,6 +37,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
@@ -85,6 +88,18 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NutritientTrackerTheme {
+                // Add this block to control the system bar icon colors
+                val view = LocalView.current
+                if (!view.isInEditMode) {
+                    LaunchedEffect(Unit) { // The key can just be Unit now
+                        val window = (view.context as Activity).window
+                        val insetsController = WindowCompat.getInsetsController(window, view)
+
+                        // Always set to true because your app is always light
+                        insetsController.isAppearanceLightStatusBars = true
+                    }
+                }
+
                 val navController = rememberNavController()
 
                 var showAddFoodDialog by remember { mutableStateOf(false) }
@@ -117,7 +132,7 @@ class MainActivity : ComponentActivity() {
                     NavHost(
                         navController = navController,
                         startDestination = NavigationItem.Dashboard.route,
-                        modifier = Modifier.padding(paddingValues)
+                        modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())
                     ) {
                         // Home Screen Destination
                         composable(
