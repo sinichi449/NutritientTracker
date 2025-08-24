@@ -47,16 +47,23 @@ class EditFoodViewModel(
         _uiState.update { it.copy(fat = newFat) }
     }
 
+    fun onQuantityChange(newQuantity: String) {
+        _uiState.update { it.copy(quantity = newQuantity) }
+    }
+
     fun updateFoodItem() {
         viewModelScope.launch {
             val currentState = _uiState.value
+            val quantity = currentState.quantity.toDoubleOrNull() ?: 1.0
+
             val updatedFoodItem = FoodItem(
                 id = foodId,
                 name = currentState.name,
-                carbs = currentState.carbs.toDoubleOrNull() ?: 0.0,
-                protein = currentState.protein.toDoubleOrNull() ?: 0.0,
-                fat = currentState.fat.toDoubleOrNull() ?: 0.0,
-                timestamp = System.currentTimeMillis() // Update the timestamp
+                // Apply the multiplier
+                carbs = (currentState.carbs.toDoubleOrNull() ?: 0.0) * quantity,
+                protein = (currentState.protein.toDoubleOrNull() ?: 0.0) * quantity,
+                fat = (currentState.fat.toDoubleOrNull() ?: 0.0) * quantity,
+                timestamp = System.currentTimeMillis()
             )
             repository.updateFoodItem(updatedFoodItem)
         }

@@ -17,5 +17,6 @@ data class AddFoodUiState(
     val name: String = "",
     val carbs: String = "",
     val protein: String = "",
-    val fat: String = ""
+    val fat: String = "",
+    val quantity: String = "1"
 )

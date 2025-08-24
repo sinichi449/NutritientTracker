@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,6 +33,7 @@ fun AddFoodScreen(
     onCarbsChange: (String) -> Unit,
     onProteinChange: (String) -> Unit,
     onFatChange: (String) -> Unit,
+    onQuantityChange: (String) -> Unit,
     onSaveClick: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -83,6 +85,19 @@ fun AddFoodScreen(
                 label = { Text("Fat (g)") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = uiState.quantity,
+                onValueChange = onQuantityChange,
+                label = { Text("Quantity / Servings") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            // Add a helper text to clarify the nutrient inputs
+            Text(
+                text = "Nutrients per single serving:",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.weight(1f))
             Button(

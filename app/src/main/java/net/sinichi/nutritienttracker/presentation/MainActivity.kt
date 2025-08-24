@@ -89,6 +89,7 @@ class MainActivity : ComponentActivity() {
                             onCarbsChange = addFoodViewModel::onCarbsChange,
                             onProteinChange = addFoodViewModel::onProteinChange,
                             onFatChange = addFoodViewModel::onFatChange,
+                            onQuantityChange = addFoodViewModel::onQuantityChange,
                             onSaveClick = addFoodViewModel::saveFoodItem,
                             onNavigateBack = {
                                 // 4. Update back navigation call
@@ -123,6 +124,7 @@ class MainActivity : ComponentActivity() {
                             onCarbsChange = editFoodViewModel::onCarbsChange,
                             onProteinChange = editFoodViewModel::onProteinChange,
                             onFatChange = editFoodViewModel::onFatChange,
+                            onQuantityChange = editFoodViewModel::onQuantityChange,
                             onSaveClick = editFoodViewModel::updateFoodItem,
                             onNavigateBack = { navController.popBackStack() }
                         )
