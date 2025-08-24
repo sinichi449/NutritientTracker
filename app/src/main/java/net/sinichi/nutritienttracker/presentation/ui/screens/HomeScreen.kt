@@ -11,12 +11,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,31 +28,19 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.outlined.ChatBubbleOutline
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.GridView
-import androidx.compose.material.icons.outlined.PersonOutline
-import androidx.compose.material.icons.outlined.PhotoCamera
-import androidx.compose.material.icons.outlined.PieChartOutline
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
@@ -70,7 +56,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -86,27 +71,10 @@ fun HomeScreen(
     uiState: HomeUiState,
     onDeleteItem: (FoodItem) -> Unit,
     onNavigateToEditFood: (String) -> Unit,
-    onNavigateToAddFood: () -> Unit //
 ) {
-    var showAddFoodDialog by remember { mutableStateOf(false) }
-
-    if (showAddFoodDialog) {
-        AddFoodOptionsDialog(
-            onDismissRequest = { showAddFoodDialog = false },
-            onAddManuallyClick = {
-                showAddFoodDialog = false
-                onNavigateToAddFood()
-            },
-            onScanClick = {
-                showAddFoodDialog = false
-                // TODO: Navigate to camera screen
-            }
-        )
-    }
-
     Scaffold(
         topBar = { NutritientTrackerHeader() },
-        bottomBar = { AppBottomNavigation(onFabClick = { showAddFoodDialog = true }) },
+//        bottomBar = { AppBottomNavigation(onFabClick = { showAddFoodDialog = true }) },
         // Use a theme color for the background
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
     ) { paddingValues ->
@@ -523,137 +491,6 @@ fun RecentFoodItemRow(
 }
 
 @Composable
-fun AppBottomNavigation(onFabClick: () -> Unit) {
-    val selectedIndex = 2 // Camera is selected
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        BottomAppBar(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-            modifier = Modifier.clip(RoundedCornerShape(20.dp)),
-            tonalElevation = 4.dp
-        ) {
-            BottomNavItem(
-                icon = Icons.Outlined.GridView,
-                label = "Dashboard",
-                isSelected = selectedIndex == 0,
-                modifier = Modifier.weight(1f)
-            ) {}
-            BottomNavItem(
-                icon = Icons.Outlined.PieChartOutline,
-                label = "Statistics",
-                isSelected = selectedIndex == 1,
-                modifier = Modifier.weight(1f)
-            ) {}
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            BottomNavItem(
-                icon = Icons.Outlined.ChatBubbleOutline,
-                label = "Chat",
-                isSelected = selectedIndex == 3,
-                modifier = Modifier.weight(1f)
-            ) {}
-            BottomNavItem(
-                icon = Icons.Outlined.PersonOutline,
-                label = "Profile",
-                isSelected = selectedIndex == 4,
-                modifier = Modifier.weight(1f)
-            ) {}
-        }
-
-        FloatingActionButton(
-            onClick = onFabClick,
-            shape = CircleShape,
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            modifier = Modifier
-                .offset(y = (-10).dp)
-                .size(70.dp)
-        ) {
-            Icon(
-                Icons.Outlined.PhotoCamera,
-                contentDescription = "Scan Food",
-                modifier = Modifier.size(30.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun RowScope.BottomNavItem(
-    icon: ImageVector,
-    label: String,
-    isSelected: Boolean,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    NavigationBarItem(
-        selected = isSelected,
-        onClick = onClick,
-        icon = { Icon(icon, contentDescription = label) },
-        label = { Text(label, fontSize = 10.sp) },
-        colors = NavigationBarItemDefaults.colors(
-            selectedIconColor = MaterialTheme.colorScheme.onSurface,
-            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            selectedTextColor = MaterialTheme.colorScheme.onSurface,
-            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            indicatorColor = Color.Transparent
-        ),
-        modifier = modifier
-    )
-}
-
-@Composable
-fun AddFoodOptionsDialog(
-    onDismissRequest: () -> Unit,
-    onAddManuallyClick: () -> Unit,
-    onScanClick: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text("Add Food Item") },
-        text = {
-            Column {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable(onClick = onAddManuallyClick)
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Outlined.Edit, contentDescription = "Add Manually")
-                    Spacer(Modifier.width(16.dp))
-                    Text("Add Manually")
-                }
-                Spacer(Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable(onClick = onScanClick)
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Outlined.PhotoCamera, contentDescription = "Scan with Camera")
-                    Spacer(Modifier.width(16.dp))
-                    Text("Scan with Camera")
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-
-@Composable
 fun RecentFoodsHeader() {
     Card(
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
@@ -686,78 +523,6 @@ fun CardFooter() {
                 shape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 20.dp, bottomEnd = 20.dp)
             )
     )
-}
-
-
-// --- UPDATED RecentFoodItemRow ---
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun RecentFoodItemRow(
-    item: FoodItem,
-    onDelete: () -> Unit,
-    onEdit: () -> Unit,
-    modifier: Modifier = Modifier // Pass modifier for animations
-) {
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = {
-            if (it == SwipeToDismissBoxValue.EndToStart) {
-                onDelete()
-                true
-            } else { false }
-        },
-        positionalThreshold = { it * .50f }
-    )
-
-    SwipeToDismissBox(
-        state = dismissState,
-        modifier = modifier.background(MaterialTheme.colorScheme.surface), // Match card background
-        backgroundContent = {
-            val color = when (dismissState.targetValue) {
-                SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
-                else -> Color.Transparent
-            }
-            val scale by animateFloatAsState(
-                if (dismissState.targetValue == SwipeToDismissBoxValue.EndToStart) 1f else 0.75f,
-                label = ""
-            )
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(color)
-                    .padding(horizontal = 20.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = "Delete Icon",
-                    modifier = Modifier.scale(scale)
-                )
-            }
-        }
-    ) {
-        // The content is no longer in a Card, just a Row on the same background
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onEdit)
-                .padding(vertical = 12.dp, horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = item.name, fontWeight = FontWeight.SemiBold)
-                Text(
-                    text = formatTimestampToAmPm(item.timestamp),
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Text(
-                text = "${item.calories} kcal",
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
 }
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
@@ -802,7 +567,6 @@ fun HomeScreenPreview() {
             ),
             onDeleteItem = {},
             onNavigateToEditFood = {},
-            onNavigateToAddFood = {},
         )
     }
 }
