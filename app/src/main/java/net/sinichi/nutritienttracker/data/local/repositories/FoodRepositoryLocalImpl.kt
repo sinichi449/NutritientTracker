@@ -1,15 +1,15 @@
-package net.sinichi.nutritienttracker.core.data
+package net.sinichi.nutritienttracker.data.local.repositories
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import net.sinichi.nutritienttracker.core.data.FoodRepository
 import net.sinichi.nutritienttracker.core.entities.FoodItem
 import net.sinichi.nutritienttracker.data.local.FoodDao
 import net.sinichi.nutritienttracker.data.local.mapper.toDomain
 import net.sinichi.nutritienttracker.data.local.mapper.toEntity
 import java.util.Calendar
-import javax.inject.Inject
 
-class FoodRepositoryLocalImpl @Inject constructor(
+class FoodRepositoryLocalImpl(
     private val dao: FoodDao
 ): FoodRepository {
     override suspend fun insertFoodItem(item: FoodItem) {

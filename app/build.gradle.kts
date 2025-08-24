@@ -3,17 +3,11 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
-    alias(libs.plugins.hilt.gradle)
-    kotlin("kapt")
+    id("com.google.devtools.ksp")
 }
 
-configurations.all {
-    resolutionStrategy.eachDependency {
-        if (requested.group == "com.squareup" && requested.name == "javapoet") {
-            useVersion("1.13.0") // Or the absolute latest javapoet version
-            because("Align javapoet versions to avoid conflicts") // Try 'because'
-        }
-    }
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 android {
@@ -40,20 +34,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "1.8"
     }
     buildFeatures {
         compose = true
-    }
-}
-
-kapt {
-    arguments {
-        arg("room.schemaLocation", "$projectDir/schemas")
     }
 }
 
@@ -90,11 +78,14 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.6.0") // Or the version from your Compose BOM
 
     // Hilt
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+//    implementation(libs.hilt.android)
+//    ksp(libs.hilt.compiler)
 
     // Room
     implementation(libs.room.runtime)
-    kapt(libs.room.compiler)
     implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+
+    // ViewModel
+    implementation(libs.lifecycle.viewmodel.compose)
 }
