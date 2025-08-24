@@ -2,6 +2,7 @@ package net.sinichi.nutritienttracker.presentation
 
 import android.app.Activity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -69,10 +70,12 @@ import net.sinichi.nutritienttracker.presentation.ui.NavigationItem
 import net.sinichi.nutritienttracker.presentation.ui.screens.AddFoodScreen
 import net.sinichi.nutritienttracker.presentation.ui.screens.EditFoodScreen
 import net.sinichi.nutritienttracker.presentation.ui.screens.HomeScreen
+import net.sinichi.nutritienttracker.presentation.ui.screens.SettingsScreen
 import net.sinichi.nutritienttracker.presentation.ui.theme.NutritientTrackerTheme
 import net.sinichi.nutritienttracker.presentation.viewmodels.AddFoodViewModel
 import net.sinichi.nutritienttracker.presentation.viewmodels.EditFoodViewModel
 import net.sinichi.nutritienttracker.presentation.viewmodels.HomeViewModel
+import net.sinichi.nutritienttracker.presentation.viewmodels.SettingsViewModel
 import net.sinichi.nutritienttracker.presentation.viewmodels.ViewModelFactory
 
 class MainActivity : ComponentActivity() {
@@ -152,11 +155,40 @@ class MainActivity : ComponentActivity() {
                                 onNavigateToEditFood = { foodId ->
                                     navController.navigate(NavigationItem.Edit.createRoute(foodId))
                                 },
+                                onNavigateToSettings = {
+                                    navController.navigate(NavigationItem.Profile.route)
+                                }
                             )
                         }
+
+                        // Statistics Screen Destination
                         composable(NavigationItem.Statistics.route) { Box { Text("Statistics Screen") } }
+
+                        // Chat Screen Destination
                         composable(NavigationItem.Chat.route) { Box { Text("Chat Screen") } }
-                        composable(NavigationItem.Profile.route) { Box { Text("Profile Screen") } }
+
+                        // Profile Screen Destination
+                        composable(
+                            route = NavigationItem.Profile.route,
+                            // Animation when this screen exits
+                            exitTransition = { slideOutHorizontally(targetOffsetX = { -300 }) + fadeOut() },
+                            popEnterTransition = { slideInHorizontally(initialOffsetX = { -300 }) + fadeIn() }
+                        ) {
+                            val settingsViewModel: SettingsViewModel = viewModel(factory = viewModelFactory)
+                            val uiState by settingsViewModel.uiState.collectAsState()
+                            SettingsScreen(
+                                uiState = uiState,
+                                onNavigateBack = { navController.popBackStack() },
+                                onSaveClick = {
+                                    settingsViewModel.saveSettings()
+                                    Toast.makeText(applicationContext, "Settings saved!", Toast.LENGTH_SHORT).show()
+                                },
+                                onDailyGoalKcalChange = settingsViewModel::onDailyKcalGoalChange,
+                                onCarbPercentageChange = settingsViewModel::onCarbPercentageChange,
+                                onProteinPercentageChange = settingsViewModel::onProteinPercentageChange,
+                                onFatPercentageChange = settingsViewModel::onFatPercentageChange
+                            )
+                        }
 
                         // Add Food Screen Destination
                         composable(
@@ -176,10 +208,7 @@ class MainActivity : ComponentActivity() {
                                 onFatChange = addFoodViewModel::onFatChange,
                                 onQuantityChange = addFoodViewModel::onQuantityChange,
                                 onSaveClick = addFoodViewModel::saveFoodItem,
-                                onNavigateBack = {
-                                    // 4. Update back navigation call
-                                    navController.popBackStack()
-                                }
+                                onNavigateBack = { navController.popBackStack() }
                             )
                         }
 

@@ -27,7 +27,7 @@ class UserProfileRepositoryLocalImpl(
         // runBlocking is used here for simplicity during initialization.
         // In a more complex app, you might handle this in a database callback.
         runBlocking {
-            dao.insertProfile(defaultProfile.toEntity())
+            dao.insertOrUpdateProfile(defaultProfile.toEntity())
         }
     }
 
@@ -42,6 +42,10 @@ class UserProfileRepositoryLocalImpl(
     }
 
     override suspend fun saveUserProfile(userProfile: UserProfile) {
-        dao.insertProfile(userProfile.toEntity())
+        dao.insertOrUpdateProfile(userProfile.toEntity())
+    }
+
+    override suspend fun updateUserProfile(userProfile: UserProfile) {
+        dao.insertOrUpdateProfile(userProfile.toEntity())
     }
 }

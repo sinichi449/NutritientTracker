@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 interface UserProfileDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertProfile(profile: UserProfileEntity)
+    suspend fun insertOrUpdateProfile(profile: UserProfileEntity)
 
     @Query("SELECT * FROM user_profile WHERE id = 1")
     fun getProfile(): Flow<UserProfileEntity?>

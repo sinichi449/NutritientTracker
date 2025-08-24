@@ -71,6 +71,7 @@ fun HomeScreen(
     uiState: HomeUiState,
     onDeleteItem: (FoodItem) -> Unit,
     onNavigateToEditFood: (String) -> Unit,
+    onNavigateToSettings: () -> Unit = {},
 ) {
     Scaffold(
         topBar = { NutritientTrackerHeader() },
@@ -86,7 +87,7 @@ fun HomeScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
         ) {
             item {
-                DateSelector()
+                DateSelector(onEditClick = onNavigateToSettings)
                 Spacer(modifier = Modifier.height(16.dp))
             }
             item {
@@ -163,7 +164,7 @@ fun NutritientTrackerHeader() {
 }
 
 @Composable
-fun DateSelector() {
+fun DateSelector(onEditClick: () -> Unit = {}) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
@@ -193,7 +194,7 @@ fun DateSelector() {
                 .clip(RoundedCornerShape(12.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainer)
         ) {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = onEditClick) {
                 Icon(
                     Icons.Default.Edit,
                     contentDescription = "Edit",
