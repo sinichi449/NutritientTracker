@@ -6,9 +6,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import net.sinichi.nutritienttracker.core.data.FoodRepository
+import kotlinx.coroutines.launch
+import net.sinichi.nutritienttracker.core.entities.FoodItem
 import net.sinichi.nutritienttracker.core.entities.MacroNutrientInfo
 import net.sinichi.nutritienttracker.core.entities.RecentFoodItems.Companion.toRecentFoodItems
+import net.sinichi.nutritienttracker.core.repositories.FoodRepository
 import net.sinichi.nutritienttracker.presentation.states.HomeUiState
 
 class HomeViewModel(
@@ -59,4 +61,10 @@ class HomeViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = HomeUiState() // Start with a default loading state
     )
+
+    fun deleteFoodItem(item: FoodItem) {
+        viewModelScope.launch {
+            repository.deleteFoodItem(item)
+        }
+    }
 }

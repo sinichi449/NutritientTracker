@@ -10,12 +10,26 @@ import net.sinichi.nutritienttracker.core.entities.FoodItem
 import net.sinichi.nutritienttracker.core.repositories.FoodRepository
 import net.sinichi.nutritienttracker.presentation.states.AddFoodUiState
 
-class AddFoodViewModel(
-    private val repository: FoodRepository
+class EditFoodViewModel(
+    private val repository: FoodRepository,
+    private val foodId: String // No more SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddFoodUiState())
     val uiState = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            repository.getFoodItemById(foodId)?.let { foodItem ->
+                _uiState.value = AddFoodUiState(
+                    name = foodItem.name,
+                    carbs = foodItem.carbs.toString(),
+                    protein = foodItem.protein.toString(),
+                    fat = foodItem.fat.toString()
+                )
+            }
+        }
+    }
 
     fun onNameChange(newName: String) {
         _uiState.update { it.copy(name = newName) }
@@ -33,25 +47,18 @@ class AddFoodViewModel(
         _uiState.update { it.copy(fat = newFat) }
     }
 
-    fun saveFoodItem() {
+    fun updateFoodItem() {
         viewModelScope.launch {
             val currentState = _uiState.value
-            val foodItem = FoodItem(
+            val updatedFoodItem = FoodItem(
+                id = foodId,
                 name = currentState.name,
                 carbs = currentState.carbs.toDoubleOrNull() ?: 0.0,
                 protein = currentState.protein.toDoubleOrNull() ?: 0.0,
                 fat = currentState.fat.toDoubleOrNull() ?: 0.0,
-                timestamp = System.currentTimeMillis()
+                timestamp = System.currentTimeMillis() // Update the timestamp
             )
-            repository.insertFoodItem(foodItem)
-
-            // Add this line to reset the state after saving
-            resetState()
+            repository.updateFoodItem(updatedFoodItem)
         }
-    }
-
-    // Add this new function to clear the input fields
-    private fun resetState() {
-        _uiState.value = AddFoodUiState()
     }
 }

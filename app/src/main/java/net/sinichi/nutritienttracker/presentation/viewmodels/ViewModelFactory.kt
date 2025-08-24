@@ -2,19 +2,24 @@ package net.sinichi.nutritienttracker.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import net.sinichi.nutritienttracker.core.data.FoodRepository
+import net.sinichi.nutritienttracker.core.repositories.FoodRepository
 
-class ViewModelFactory(private val repository: FoodRepository) : ViewModelProvider.Factory {
+class ViewModelFactory(
+    private val repository: FoodRepository
+) : ViewModelProvider.Factory {
+
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return HomeViewModel(repository) as T
+        return when {
+            modelClass.isAssignableFrom(HomeViewModel::class.java) -> {
+                HomeViewModel(repository) as T
+            }
+            modelClass.isAssignableFrom(AddFoodViewModel::class.java) -> {
+                AddFoodViewModel(repository) as T
+            }
+            // We will handle EditFoodViewModel separately
+            else -> {
+                throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
+            }
         }
-        // Add this block for the new ViewModel
-        if (modelClass.isAssignableFrom(AddFoodViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return AddFoodViewModel(repository) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

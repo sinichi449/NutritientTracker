@@ -1,9 +1,11 @@
 package net.sinichi.nutritienttracker.data.local
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -14,6 +16,15 @@ interface FoodDao {
     @Query("SELECT * FROM food_items ORDER BY timestamp DESC")
     fun getAllFoodItems(): Flow<List<FoodItemEntity>>
 
+    @Update
+    suspend fun updateFoodItem(item: FoodItemEntity)
+
+    @Delete
+    suspend fun deleteFoodItem(item: FoodItemEntity)
+
     @Query("SELECT * FROM food_Items WHERE timestamp >= :startOfDay AND timestamp < :endOfDay ORDER BY timestamp DESC")
     fun getFoodItemsForDay(startOfDay: Long, endOfDay: Long): Flow<List<FoodItemEntity>>
+
+    @Query("SELECT * FROM food_items WHERE id = :id")
+    suspend fun getFoodItemById(id: String): FoodItemEntity?
 }

@@ -2,8 +2,8 @@ package net.sinichi.nutritienttracker.data.local.repositories
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import net.sinichi.nutritienttracker.core.data.FoodRepository
 import net.sinichi.nutritienttracker.core.entities.FoodItem
+import net.sinichi.nutritienttracker.core.repositories.FoodRepository
 import net.sinichi.nutritienttracker.data.local.FoodDao
 import net.sinichi.nutritienttracker.data.local.mapper.toDomain
 import net.sinichi.nutritienttracker.data.local.mapper.toEntity
@@ -35,5 +35,17 @@ class FoodRepositoryLocalImpl(
         return dao.getFoodItemsForDay(startOfDay, endOfDay).map { list ->
             list.map { it.toDomain() }
         }
+    }
+
+    override suspend fun getFoodItemById(id: String): FoodItem? {
+        return dao.getFoodItemById(id)?.toDomain()
+    }
+
+    override suspend fun updateFoodItem(item: FoodItem) {
+        dao.updateFoodItem(item.toEntity())
+    }
+
+    override suspend fun deleteFoodItem(item: FoodItem) {
+        dao.deleteFoodItem(item.toEntity())
     }
 }
