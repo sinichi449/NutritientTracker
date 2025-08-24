@@ -71,11 +71,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.sinichi.nutritienttracker.core.entities.MacroNutrientInfo
 import net.sinichi.nutritienttracker.core.entities.RecentFoodItems
-import net.sinichi.nutritienttracker.presentation.ui.HomeUiState
+import net.sinichi.nutritienttracker.presentation.states.HomeUiState
 import net.sinichi.nutritienttracker.presentation.ui.theme.NutritientTrackerTheme
 
 @Composable
-fun HomeScreen(uiState: HomeUiState) {
+fun HomeScreen(
+    uiState: HomeUiState,
+    onNavigateToAddFood: () -> Unit //
+) {
     var showAddFoodDialog by remember { mutableStateOf(false) }
 
     if (showAddFoodDialog) {
@@ -83,7 +86,7 @@ fun HomeScreen(uiState: HomeUiState) {
             onDismissRequest = { showAddFoodDialog = false },
             onAddManuallyClick = {
                 showAddFoodDialog = false
-                // TODO: Navigate to manual entry screen
+                onNavigateToAddFood()
             },
             onScanClick = {
                 showAddFoodDialog = false
@@ -591,7 +594,7 @@ fun HomeScreenPreview() {
                 calorieGoal = goal,
                 macroNutrients = macroData,
                 recentFoods = recentFoods
-            )
+            ), {}
         )
     }
 }

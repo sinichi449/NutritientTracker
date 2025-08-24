@@ -10,8 +10,11 @@ class ViewModelFactory(private val repository: FoodRepository) : ViewModelProvid
             @Suppress("UNCHECKED_CAST")
             return HomeViewModel(repository) as T
         }
-        // Add other ViewModels here in the future
-        // if (modelClass.isAssignableFrom(AddFoodViewModel::class.java)) { ... }
+        // Add this block for the new ViewModel
+        if (modelClass.isAssignableFrom(AddFoodViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return AddFoodViewModel(repository) as T
+        }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

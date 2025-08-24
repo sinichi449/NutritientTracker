@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.stateIn
 import net.sinichi.nutritienttracker.core.data.FoodRepository
 import net.sinichi.nutritienttracker.core.entities.MacroNutrientInfo
 import net.sinichi.nutritienttracker.core.entities.RecentFoodItems.Companion.toRecentFoodItems
-import net.sinichi.nutritienttracker.presentation.ui.HomeUiState
+import net.sinichi.nutritienttracker.presentation.states.HomeUiState
 
 class HomeViewModel(
     private val repository: FoodRepository
