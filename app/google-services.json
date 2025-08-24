@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "543940284778",
+    "project_id": "nutritient-tracker",
+    "storage_bucket": "nutritient-tracker.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:543940284778:android:d2574fd72382bfb6035513",
+        "android_client_info": {
+          "package_name": "net.sinichi.nutritienttracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLXcuvAduWKv_nbdlPKWrL7jEyywxHWaE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
