@@ -70,11 +70,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.sinichi.nutritienttracker.core.entities.MacroNutrientInfo
-import net.sinichi.nutritienttracker.core.entities.RecentFoodItem
+import net.sinichi.nutritienttracker.core.entities.RecentFoodItems
+import net.sinichi.nutritienttracker.presentation.ui.HomeUiState
 import net.sinichi.nutritienttracker.presentation.ui.theme.NutritientTrackerTheme
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(uiState: HomeUiState) {
     var showAddFoodDialog by remember { mutableStateOf(false) }
 
     if (showAddFoodDialog) {
@@ -109,15 +110,21 @@ fun HomeScreen() {
                 Spacer(modifier = Modifier.height(16.dp))
             }
             item {
-                DailyIntakeCard(progress = 0.68f, consumed = 1250, goal = 1850)
+                // Pass dynamic data to the card
+                DailyIntakeCard(
+                    progress = uiState.dailyIntakeProgress,
+                    consumed = uiState.caloriesConsumed,
+                    goal = uiState.calorieGoal,
+                )
                 Spacer(modifier = Modifier.height(16.dp))
             }
             item {
-                NutritionCard()
+                // Pass dynamic data to the card
+                NutritionCard(macroData = uiState.macroNutrients)
                 Spacer(modifier = Modifier.height(16.dp))
             }
             item {
-                RecentFoodsCard()
+                RecentFoodsCard(recentFoods = uiState.recentFoods)
             }
         }
     }
@@ -281,25 +288,7 @@ fun CircularProgress(progress: Float, consumed: Int, goal: Int) {
 }
 
 @Composable
-fun NutritionCard() {
-    val macroData = listOf(
-        MacroNutrientInfo(
-            name = "Carbs",
-            consumed = 109.0,
-            goal = 198.0
-        ),
-        MacroNutrientInfo(
-            name = "Fat",
-            consumed = 13.5,
-            goal = 52.0
-        ),
-        MacroNutrientInfo(
-            name = "Protein",
-            consumed = 34.2,
-            goal = 122.0
-        )
-    )
-
+fun NutritionCard(macroData: List<MacroNutrientInfo>) {
     Card(
         // Added clickable modifier
         modifier = Modifier.clickable { /* TODO: Handle navigation to nutrition details */ },
@@ -376,14 +365,7 @@ fun MacroNutrientBar(info: MacroNutrientInfo) {
 }
 
 @Composable
-fun RecentFoodsCard() {
-    val recentFoods = listOf(
-        RecentFoodItem("Chicken Salad", "12:15 PM", carbs = 10.0, protein = 30.0, fat = 21.1),
-        RecentFoodItem("Apple", "10:02 AM", carbs = 25.0, protein = 0.5, fat = 0.3),
-        RecentFoodItem("Protein Shake", "07:30 AM", carbs = 5.0, protein = 25.0, fat = 3.3),
-        RecentFoodItem("Greek Yogurt", "07:30 AM", carbs = 10.0, protein = 15.0, fat = 5.6)
-    )
-
+fun RecentFoodsCard(recentFoods: List<RecentFoodItems>) {
     Card(
         // Added clickable modifier
         modifier = Modifier.clickable { /* TODO: Handle navigation to recent foods list */ },
@@ -415,7 +397,7 @@ fun RecentFoodsCard() {
 }
 
 @Composable
-fun RecentFoodItemRow(item: RecentFoodItem) {
+fun RecentFoodItemRow(item: RecentFoodItems) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -572,7 +554,44 @@ fun AddFoodOptionsDialog(
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
 fun HomeScreenPreview() {
+    val progress = 0.68f
+    val consumed = 1250
+    val goal = 1850
+
+    val macroData = listOf(
+        MacroNutrientInfo(
+            name = "Carbs",
+            consumed = 109.0,
+            goal = 198.0
+        ),
+        MacroNutrientInfo(
+            name = "Fat",
+            consumed = 13.5,
+            goal = 52.0
+        ),
+        MacroNutrientInfo(
+            name = "Protein",
+            consumed = 34.2,
+            goal = 122.0
+        )
+    )
+
+    val recentFoods = listOf(
+        RecentFoodItems("Chicken Salad", "12:15 PM", carbs = 10.0, protein = 30.0, fat = 21.1),
+        RecentFoodItems("Apple", "10:02 AM", carbs = 25.0, protein = 0.5, fat = 0.3),
+        RecentFoodItems("Protein Shake", "07:30 AM", carbs = 5.0, protein = 25.0, fat = 3.3),
+        RecentFoodItems("Greek Yogurt", "07:30 AM", carbs = 10.0, protein = 15.0, fat = 5.6)
+    )
+
     NutritientTrackerTheme {
-        HomeScreen()
+        HomeScreen(
+            HomeUiState(
+                dailyIntakeProgress = progress,
+                caloriesConsumed = consumed,
+                calorieGoal = goal,
+                macroNutrients = macroData,
+                recentFoods = recentFoods
+            )
+        )
     }
 }
