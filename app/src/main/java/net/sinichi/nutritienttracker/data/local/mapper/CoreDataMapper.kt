@@ -13,7 +13,7 @@ import net.sinichi.nutritienttracker.data.local.FoodItemEntity
  */
 fun FoodItemEntity.toDomain(): FoodItem {
     return FoodItem(
-        id = this.id.toString(),
+        id = this.id,
         name = this.name,
         protein = this.protein,
         carbs = this.carbs,
@@ -28,7 +28,7 @@ fun FoodItemEntity.toDomain(): FoodItem {
  */
 fun FoodItem.toEntity(): FoodItemEntity {
     return FoodItemEntity(
-        id = 0, // If id is 0 for a new item, Room handles auto-generation
+        id = id, // If id is 0 for a new item, Room handles auto-generation
         name = this.name,
         protein = this.protein,
         carbs = this.carbs,

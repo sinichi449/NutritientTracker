@@ -2,7 +2,7 @@ package net.sinichi.nutritienttracker
 
 import android.app.Application
 import androidx.room.Room
-import net.sinichi.nutritienttracker.core.data.FoodRepository
+import net.sinichi.nutritienttracker.core.repositories.FoodRepository
 import net.sinichi.nutritienttracker.data.local.AppDatabase
 import net.sinichi.nutritienttracker.data.local.repositories.FoodRepositoryLocalImpl
 

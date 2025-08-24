@@ -21,12 +21,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Edit
@@ -49,9 +51,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -61,6 +66,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -69,14 +75,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.sinichi.nutritienttracker.core.entities.FoodItem
 import net.sinichi.nutritienttracker.core.entities.MacroNutrientInfo
 import net.sinichi.nutritienttracker.core.entities.RecentFoodItems
+import net.sinichi.nutritienttracker.core.entities.formatTimestampToAmPm
 import net.sinichi.nutritienttracker.presentation.states.HomeUiState
 import net.sinichi.nutritienttracker.presentation.ui.theme.NutritientTrackerTheme
 
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
+    onDeleteItem: (FoodItem) -> Unit,
+    onNavigateToEditFood: (String) -> Unit,
     onNavigateToAddFood: () -> Unit //
 ) {
     var showAddFoodDialog by remember { mutableStateOf(false) }
@@ -126,8 +136,30 @@ fun HomeScreen(
                 NutritionCard(macroData = uiState.macroNutrients)
                 Spacer(modifier = Modifier.height(16.dp))
             }
+            // --- REFACTORED RECENT FOODS SECTION ---
+            // We build the card's content directly into the LazyColumn
+            // to provide a unique key for each food item.
+
+            // 1. Card Header
             item {
-                RecentFoodsCard(recentFoods = uiState.recentFoods)
+                RecentFoodsHeader()
+            }
+
+// 2. The list of food items, now with the correct function call
+            items(
+                items = uiState.recentFoods,
+                key = { foodItem -> foodItem.id } // The key is crucial
+            ) { foodItem ->
+                RecentFoodItemRow(
+                    item = foodItem,
+                    onDelete = { onDeleteItem(foodItem.toFoodItem()) }, // Assuming you have a mapper
+                    onEdit = { onNavigateToEditFood(foodItem.id) },
+                )
+            }
+
+// 3. Card Footer
+            item {
+                CardFooter()
             }
         }
     }
@@ -368,7 +400,11 @@ fun MacroNutrientBar(info: MacroNutrientInfo) {
 }
 
 @Composable
-fun RecentFoodsCard(recentFoods: List<RecentFoodItems>) {
+fun RecentFoodsCard(
+    recentFoods: List<RecentFoodItems>,
+    onDeleteItem: (FoodItem) -> Unit,
+    onEditItem: (String) -> Unit,
+) {
     Card(
         // Added clickable modifier
         modifier = Modifier.clickable { /* TODO: Handle navigation to recent foods list */ },
@@ -386,13 +422,22 @@ fun RecentFoodsCard(recentFoods: List<RecentFoodItems>) {
                     modifier = Modifier.size(16.dp)
                 )
             }
+
             Spacer(modifier = Modifier.height(8.dp))
             HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.surfaceContainer)
             Spacer(modifier = Modifier.height(8.dp))
 
-            Column {
-                recentFoods.forEach { foodItem ->
-                    RecentFoodItemRow(item = foodItem)
+            if (recentFoods.isEmpty()) {
+                // TODO
+            } else {
+                Column {
+                    recentFoods.forEach { foodItem ->
+                        RecentFoodItemRow(
+                            item = foodItem,
+                            onDelete = { onDeleteItem(foodItem.toFoodItem()) },
+                            onEdit = { onEditItem(foodItem.id) }
+                        )
+                    }
                 }
             }
         }
@@ -400,26 +445,81 @@ fun RecentFoodsCard(recentFoods: List<RecentFoodItems>) {
 }
 
 @Composable
-fun RecentFoodItemRow(item: RecentFoodItems) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = item.name, fontWeight = FontWeight.SemiBold)
-            Text(
-                text = item.time,
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+fun RecentFoodItemRow(
+    item: RecentFoodItems,
+    onDelete: () -> Unit,
+    onEdit: () -> Unit,
+) {
+    // 1. This state tracks the swipe gesture.
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = {
+            // This lambda is triggered when the swipe is completed.
+            if (it == SwipeToDismissBoxValue.EndToStart) {
+                onDelete() // Call the delete function passed from the ViewModel.
+                true // Return true to confirm the state change (item is dismissed).
+            } else {
+                false // Don't dismiss for other swipe directions.
+            }
+        },
+        // We can set a positional threshold, e.g., swipe past 50% to trigger.
+        positionalThreshold = { it * .50f }
+    )
+
+    // 2. This is the main composable that provides the swipe functionality
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            val color = when (dismissState.targetValue) {
+                SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
+                else -> Color.Transparent
+            }
+            val scale by animateFloatAsState(
+                if (dismissState.targetValue == SwipeToDismissBoxValue.EndToStart) 1f else 0.75f
             )
+
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(color, shape = RoundedCornerShape(12.dp))
+                    .padding(horizontal = 20.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Delete Icon",
+                    modifier = Modifier.scale(scale)
+                )
+            }
+        },
+        modifier = Modifier.padding(vertical = 4.dp)
+    ) {
+        Card(
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onEdit) // The item itself is clickable for editing.
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = item.name, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        text = item.time,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Text(
+                    text = "${item.calories} kcal",
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
-        Text(
-            text = "${item.calories} kcal",
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
     }
 }
 
@@ -554,6 +654,113 @@ fun AddFoodOptionsDialog(
     )
 }
 
+@Composable
+fun RecentFoodsHeader() {
+    Card(
+        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+    ) {
+        Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("🍽️ Recent Foods", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = "Go to details",
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.surfaceContainer)
+        }
+    }
+}
+
+@Composable
+fun CardFooter() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(16.dp)
+            .background(
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 20.dp, bottomEnd = 20.dp)
+            )
+    )
+}
+
+
+// --- UPDATED RecentFoodItemRow ---
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RecentFoodItemRow(
+    item: FoodItem,
+    onDelete: () -> Unit,
+    onEdit: () -> Unit,
+    modifier: Modifier = Modifier // Pass modifier for animations
+) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = {
+            if (it == SwipeToDismissBoxValue.EndToStart) {
+                onDelete()
+                true
+            } else { false }
+        },
+        positionalThreshold = { it * .50f }
+    )
+
+    SwipeToDismissBox(
+        state = dismissState,
+        modifier = modifier.background(MaterialTheme.colorScheme.surface), // Match card background
+        backgroundContent = {
+            val color = when (dismissState.targetValue) {
+                SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
+                else -> Color.Transparent
+            }
+            val scale by animateFloatAsState(
+                if (dismissState.targetValue == SwipeToDismissBoxValue.EndToStart) 1f else 0.75f,
+                label = ""
+            )
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(color)
+                    .padding(horizontal = 20.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Delete Icon",
+                    modifier = Modifier.scale(scale)
+                )
+            }
+        }
+    ) {
+        // The content is no longer in a Card, just a Row on the same background
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onEdit)
+                .padding(vertical = 12.dp, horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = item.name, fontWeight = FontWeight.SemiBold)
+                Text(
+                    text = formatTimestampToAmPm(item.timestamp),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Text(
+                text = "${item.calories} kcal",
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
 fun HomeScreenPreview() {
@@ -579,22 +786,26 @@ fun HomeScreenPreview() {
         )
     )
 
+    val currentTime = "5:31 pm"
     val recentFoods = listOf(
-        RecentFoodItems("Chicken Salad", "12:15 PM", carbs = 10.0, protein = 30.0, fat = 21.1),
-        RecentFoodItems("Apple", "10:02 AM", carbs = 25.0, protein = 0.5, fat = 0.3),
-        RecentFoodItems("Protein Shake", "07:30 AM", carbs = 5.0, protein = 25.0, fat = 3.3),
-        RecentFoodItems("Greek Yogurt", "07:30 AM", carbs = 10.0, protein = 15.0, fat = 5.6)
+        RecentFoodItems("Chicken Salad", "12:15 PM", carbs = 10.0, protein = 30.0, fat = 21.1, time = currentTime),
+        RecentFoodItems("Apple", "10:02 AM", carbs = 25.0, protein = 0.5, fat = 0.3, time = currentTime),
+        RecentFoodItems("Protein Shake", "07:30 AM", carbs = 5.0, protein = 25.0, fat = 3.3, time = currentTime),
+        RecentFoodItems("Greek Yogurt", "07:30 AM", carbs = 10.0, protein = 15.0, fat = 5.6, time = currentTime)
     )
 
     NutritientTrackerTheme {
         HomeScreen(
-            HomeUiState(
+            uiState = HomeUiState(
                 dailyIntakeProgress = progress,
                 caloriesConsumed = consumed,
                 calorieGoal = goal,
                 macroNutrients = macroData,
                 recentFoods = recentFoods
-            ), {}
+            ),
+            onDeleteItem = {},
+            onNavigateToEditFood = {},
+            onNavigateToAddFood = {},
         )
     }
 }
