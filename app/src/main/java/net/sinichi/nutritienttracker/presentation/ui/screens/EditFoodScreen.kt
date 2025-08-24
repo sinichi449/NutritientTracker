@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import net.sinichi.nutritienttracker.core.entities.FoodCategory
 import net.sinichi.nutritienttracker.presentation.states.AddFoodUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,6 +36,7 @@ fun EditFoodScreen(
     onProteinChange: (String) -> Unit,
     onFatChange: (String) -> Unit,
     onQuantityChange: (String) -> Unit,
+    onCategoryChange: (FoodCategory) -> Unit,
     onSaveClick: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -60,6 +62,10 @@ fun EditFoodScreen(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            CategorySelector(
+                selectedCategory = uiState.category,
+                onCategorySelected = onCategoryChange,
+            )
             OutlinedTextField(
                 value = uiState.name,
                 onValueChange = onNameChange,
@@ -134,6 +140,7 @@ fun EditFoodScreenPreview(modifier: Modifier = Modifier) {
         onFatChange = {},
         onSaveClick = {},
         onQuantityChange = {},
+        onCategoryChange = {},
         onNavigateBack = {},
     )
 }

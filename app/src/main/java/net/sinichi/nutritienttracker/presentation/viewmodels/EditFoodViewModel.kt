@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import net.sinichi.nutritienttracker.core.entities.FoodCategory
 import net.sinichi.nutritienttracker.core.entities.FoodItem
 import net.sinichi.nutritienttracker.core.repositories.FoodRepository
 import net.sinichi.nutritienttracker.presentation.states.AddFoodUiState
@@ -25,7 +26,8 @@ class EditFoodViewModel(
                     name = foodItem.name,
                     carbs = foodItem.carbs.toString(),
                     protein = foodItem.protein.toString(),
-                    fat = foodItem.fat.toString()
+                    fat = foodItem.fat.toString(),
+                    category = foodItem.category,
                 )
             }
         }
@@ -51,6 +53,10 @@ class EditFoodViewModel(
         _uiState.update { it.copy(quantity = newQuantity) }
     }
 
+    fun onCategoryChange(newCategory: FoodCategory) {
+        _uiState.update { it.copy(category = newCategory) }
+    }
+
     fun updateFoodItem() {
         viewModelScope.launch {
             val currentState = _uiState.value
@@ -63,7 +69,8 @@ class EditFoodViewModel(
                 carbs = (currentState.carbs.toDoubleOrNull() ?: 0.0) * quantity,
                 protein = (currentState.protein.toDoubleOrNull() ?: 0.0) * quantity,
                 fat = (currentState.fat.toDoubleOrNull() ?: 0.0) * quantity,
-                timestamp = System.currentTimeMillis()
+                timestamp = System.currentTimeMillis(),
+                category = currentState.category,
             )
             repository.updateFoodItem(updatedFoodItem)
         }

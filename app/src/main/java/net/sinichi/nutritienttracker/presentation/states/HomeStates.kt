@@ -1,5 +1,6 @@
 package net.sinichi.nutritienttracker.presentation.states
 
+import net.sinichi.nutritienttracker.core.entities.FoodCategory
 import net.sinichi.nutritienttracker.core.entities.FoodItem
 import net.sinichi.nutritienttracker.core.entities.MacroNutrientInfo
 
@@ -18,5 +19,6 @@ data class AddFoodUiState(
     val carbs: String = "",
     val protein: String = "",
     val fat: String = "",
-    val quantity: String = "1"
+    val quantity: String = "1",
+    val category: FoodCategory = FoodCategory.MEAL,
 )

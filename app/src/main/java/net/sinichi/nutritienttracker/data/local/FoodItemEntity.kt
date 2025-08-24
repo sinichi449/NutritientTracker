@@ -1,5 +1,6 @@
 package net.sinichi.nutritienttracker.data.local
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -12,4 +13,6 @@ data class FoodItemEntity(
     val carbs: Double,
     val protein: Double,
     val fat: Double,
+    @ColumnInfo(defaultValue = "UNASSIGNED")
+    val category: String,
 )

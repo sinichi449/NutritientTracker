@@ -445,9 +445,16 @@ fun RecentFoodItemRow(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Display the emoji based on the category
+                Text(
+                    text = item.category.emoji,
+                    fontSize = 24.sp,
+                    modifier = Modifier.padding(end = 12.dp)
+                )
+
                 Column(modifier = Modifier.weight(1f)) {
                     Text(text = item.name, fontWeight = FontWeight.SemiBold)
                     Text(
@@ -457,7 +464,7 @@ fun RecentFoodItemRow(
                     )
                 }
                 Text(
-                    text = "${item.calories} kcal",
+                    text = "${item.calories.toInt()} kcal",
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )

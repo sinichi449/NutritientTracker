@@ -208,6 +208,7 @@ class MainActivity : ComponentActivity() {
                                 onFatChange = addFoodViewModel::onFatChange,
                                 onQuantityChange = addFoodViewModel::onQuantityChange,
                                 onSaveClick = addFoodViewModel::saveFoodItem,
+                                onCategoryChange = addFoodViewModel::onCategoryChange,
                                 onNavigateBack = { navController.popBackStack() }
                             )
                         }
@@ -243,6 +244,7 @@ class MainActivity : ComponentActivity() {
                                 onFatChange = editFoodViewModel::onFatChange,
                                 onQuantityChange = editFoodViewModel::onQuantityChange,
                                 onSaveClick = editFoodViewModel::updateFoodItem,
+                                onCategoryChange = editFoodViewModel::onCategoryChange,
                                 onNavigateBack = { navController.popBackStack() }
                             )
                         }

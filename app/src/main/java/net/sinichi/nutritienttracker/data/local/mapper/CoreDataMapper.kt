@@ -1,6 +1,7 @@
 package net.sinichi.nutritienttracker.data.local.mapper
 
 // Import the core domain entity
+import net.sinichi.nutritienttracker.core.entities.FoodCategory
 import net.sinichi.nutritienttracker.core.entities.FoodItem
 import net.sinichi.nutritienttracker.core.entities.UserProfile
 // Import the local database entity
@@ -20,6 +21,11 @@ fun FoodItemEntity.toDomain(): FoodItem {
         protein = this.protein,
         carbs = this.carbs,
         fat = this.fat,
+        category = try { // Safely convert String to enum
+            FoodCategory.valueOf(this.category)
+        } catch (e: IllegalArgumentException) {
+            FoodCategory.UNASSIGNED
+        },
         timestamp = this.timestamp
     )
 }
@@ -35,7 +41,8 @@ fun FoodItem.toEntity(): FoodItemEntity {
         protein = this.protein,
         carbs = this.carbs,
         fat = this.fat,
-        timestamp = this.timestamp
+        timestamp = this.timestamp,
+        category = this.category.name
     )
 }
 

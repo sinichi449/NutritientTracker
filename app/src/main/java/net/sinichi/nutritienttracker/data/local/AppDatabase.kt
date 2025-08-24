@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase
         FoodItemEntity::class,
         UserProfileEntity::class
    ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 abstract class AppDatabase: RoomDatabase() {

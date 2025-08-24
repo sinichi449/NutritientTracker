@@ -8,7 +8,8 @@ data class FoodItem(
     val timestamp: Long = System.currentTimeMillis(),
     val carbs: Double = 0.0,    // in grams
     val protein: Double = 0.0,  // in grams
-    val fat: Double = 0.0       // in grams
+    val fat: Double = 0.0,       // in grams
+    val category: FoodCategory = FoodCategory.UNASSIGNED,
 ) {
     val calories = calculateCalories(carbs, protein, fat)
 }
