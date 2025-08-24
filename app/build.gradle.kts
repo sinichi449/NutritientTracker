@@ -67,4 +67,9 @@ dependencies {
     implementation(libs.camera.camera2)
     implementation(libs.camera.lifecycle)
     implementation(libs.camera.view)
+
+    // Icons
+    implementation("androidx.compose.material:material-icons-core:1.6.0") // Or the version from your Compose BOM
+    implementation("androidx.compose.material:material-icons-extended:1.6.0") // Or the version from your Compose BOM
+
 }
