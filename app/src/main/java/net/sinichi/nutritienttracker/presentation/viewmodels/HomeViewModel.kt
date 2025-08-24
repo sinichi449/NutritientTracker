@@ -41,10 +41,17 @@ class HomeViewModel(
 
         // Calculate goals based on user profile
         val calorieGoal = userProfile.dailyGoalKcal
-        val carbsGoal = (calorieGoal * (userProfile.carbPercentage.toDouble() / 100))
-        val proteinGoal = (calorieGoal * (userProfile.proteinPercentage.toDouble() / 100))
-        val fatGoal = (calorieGoal * (userProfile.fatPercentage.toDouble() / 100))
 
+        // --- CORRECTED GOAL CALCULATIONS ---
+        val targetCaloriesFromCarbs = calorieGoal * (userProfile.carbPercentage.toDouble() / 100)
+        val carbsGoal = if (calorieGoal > 0) targetCaloriesFromCarbs / 4.0 else 0.0 // 4 kcal/gram for carbs
+
+        val targetCaloriesFromProtein = calorieGoal * (userProfile.proteinPercentage.toDouble() / 100)
+        val proteinGoal = if (calorieGoal > 0) targetCaloriesFromProtein / 4.0 else 0.0 // 4 kcal/gram for protein
+
+        val targetCaloriesFromFat = calorieGoal * (userProfile.fatPercentage.toDouble() / 100)
+        val fatGoal = if (calorieGoal > 0) targetCaloriesFromFat / 9.0 else 0.0 // 9 kcal/gram for fat
+        // --- END OF CORRECTIONS ---
 
         // Create the list of macronutrient info
         val macros = listOf(
