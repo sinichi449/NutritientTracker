@@ -77,7 +77,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.sinichi.nutritienttracker.core.entities.FoodItem
 import net.sinichi.nutritienttracker.core.entities.MacroNutrientInfo
-import net.sinichi.nutritienttracker.core.entities.RecentFoodItems
 import net.sinichi.nutritienttracker.core.entities.formatTimestampToAmPm
 import net.sinichi.nutritienttracker.presentation.states.HomeUiState
 import net.sinichi.nutritienttracker.presentation.ui.theme.NutritientTrackerTheme
@@ -152,7 +151,7 @@ fun HomeScreen(
             ) { foodItem ->
                 RecentFoodItemRow(
                     item = foodItem,
-                    onDelete = { onDeleteItem(foodItem.toFoodItem()) }, // Assuming you have a mapper
+                    onDelete = { onDeleteItem(foodItem) }, // Assuming you have a mapper
                     onEdit = { onNavigateToEditFood(foodItem.id) },
                 )
             }
@@ -401,7 +400,7 @@ fun MacroNutrientBar(info: MacroNutrientInfo) {
 
 @Composable
 fun RecentFoodsCard(
-    recentFoods: List<RecentFoodItems>,
+    recentFoods: List<FoodItem>,
     onDeleteItem: (FoodItem) -> Unit,
     onEditItem: (String) -> Unit,
 ) {
@@ -434,7 +433,7 @@ fun RecentFoodsCard(
                     recentFoods.forEach { foodItem ->
                         RecentFoodItemRow(
                             item = foodItem,
-                            onDelete = { onDeleteItem(foodItem.toFoodItem()) },
+                            onDelete = { onDeleteItem(foodItem) },
                             onEdit = { onEditItem(foodItem.id) }
                         )
                     }
@@ -446,7 +445,7 @@ fun RecentFoodsCard(
 
 @Composable
 fun RecentFoodItemRow(
-    item: RecentFoodItems,
+    item: FoodItem,
     onDelete: () -> Unit,
     onEdit: () -> Unit,
 ) {
@@ -502,13 +501,13 @@ fun RecentFoodItemRow(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                    .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(text = item.name, fontWeight = FontWeight.SemiBold)
                     Text(
-                        text = item.time,
+                        text = formatTimestampToAmPm(item.timestamp),
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -785,13 +784,11 @@ fun HomeScreenPreview() {
             goal = 122.0
         )
     )
-
-    val currentTime = "5:31 pm"
     val recentFoods = listOf(
-        RecentFoodItems("Chicken Salad", "12:15 PM", carbs = 10.0, protein = 30.0, fat = 21.1, time = currentTime),
-        RecentFoodItems("Apple", "10:02 AM", carbs = 25.0, protein = 0.5, fat = 0.3, time = currentTime),
-        RecentFoodItems("Protein Shake", "07:30 AM", carbs = 5.0, protein = 25.0, fat = 3.3, time = currentTime),
-        RecentFoodItems("Greek Yogurt", "07:30 AM", carbs = 10.0, protein = 15.0, fat = 5.6, time = currentTime)
+        FoodItem("Chicken Salad", "12:15 PM", carbs = 10.0, protein = 30.0, fat = 21.1),
+        FoodItem("Apple", "10:02 AM", carbs = 25.0, protein = 0.5, fat = 0.3),
+        FoodItem("Protein Shake", "07:30 AM", carbs = 5.0, protein = 25.0, fat = 3.3),
+        FoodItem("Greek Yogurt", "07:30 AM", carbs = 10.0, protein = 15.0, fat = 5.6)
     )
 
     NutritientTrackerTheme {

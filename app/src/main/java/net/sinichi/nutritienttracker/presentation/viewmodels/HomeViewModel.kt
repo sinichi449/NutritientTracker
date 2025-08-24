@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import net.sinichi.nutritienttracker.core.entities.FoodItem
 import net.sinichi.nutritienttracker.core.entities.MacroNutrientInfo
-import net.sinichi.nutritienttracker.core.entities.RecentFoodItems.Companion.toRecentFoodItems
 import net.sinichi.nutritienttracker.core.repositories.FoodRepository
 import net.sinichi.nutritienttracker.presentation.states.HomeUiState
 
@@ -53,7 +52,7 @@ class HomeViewModel(
             calorieGoal = calorieGoal,
             dailyIntakeProgress = if (calorieGoal > 0) (caloriesConsumed.toFloat() / calorieGoal) else 0f,
             macroNutrients = macros,
-            recentFoods = recentFoods.toRecentFoodItems(), // Convert FoodItem to RecentFoodItem
+            recentFoods = recentFoods,
             isLoading = false
         )
     }.stateIn(
