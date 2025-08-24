@@ -31,6 +31,8 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -41,7 +43,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -62,17 +66,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.sinichi.nutritienttracker.core.entities.FoodItem
 import net.sinichi.nutritienttracker.core.entities.MacroNutrientInfo
-import net.sinichi.nutritienttracker.core.entities.formatTimestampToAmPm
+import net.sinichi.nutritienttracker.core.formatTimestampToAmPm
+import net.sinichi.nutritienttracker.core.isToday
+import net.sinichi.nutritienttracker.core.isYesterday
 import net.sinichi.nutritienttracker.presentation.states.HomeUiState
 import net.sinichi.nutritienttracker.presentation.ui.theme.NutritientTrackerTheme
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
+    selectedDate: Long, // Receive the selected date from the ViewModel
+    onDateSelected: (Int, Int, Int) -> Unit, // Callback to update the date
     onDeleteItem: (FoodItem) -> Unit,
     onNavigateToEditFood: (String) -> Unit,
     onNavigateToSettings: () -> Unit = {},
 ) {
+    // State to control the visibility of the date picker dialog
+    var showDatePicker by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = { NutritientTrackerHeader() },
 //        bottomBar = { AppBottomNavigation(onFabClick = { showAddFoodDialog = true }) },
@@ -87,7 +103,11 @@ fun HomeScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
         ) {
             item {
-                DateSelector(onEditClick = onNavigateToSettings)
+                DateSelector(
+                    selectedDate = selectedDate,
+                    onDateSelectorClick = { showDatePicker = true },
+                    onEditClick = onNavigateToSettings,
+                )
                 Spacer(modifier = Modifier.height(16.dp))
             }
             item {
@@ -110,7 +130,7 @@ fun HomeScreen(
 
             // 1. Card Header
             item {
-                RecentFoodsHeader()
+                FoodListHeader(selectedDate)
             }
 
             // 2. The list of food items, now with the correct function call
@@ -129,6 +149,37 @@ fun HomeScreen(
             item {
                 CardFooter()
             }
+        }
+    }
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = selectedDate)
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val calendar = Calendar.getInstance().apply { timeInMillis = millis }
+                            onDateSelected(
+                                calendar.get(Calendar.YEAR),
+                                calendar.get(Calendar.MONTH),
+                                calendar.get(Calendar.DAY_OF_MONTH)
+                            )
+                        }
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
 }
@@ -164,7 +215,17 @@ fun NutritientTrackerHeader() {
 }
 
 @Composable
-fun DateSelector(onEditClick: () -> Unit = {}) {
+fun DateSelector(
+    selectedDate: Long,
+    onDateSelectorClick: () -> Unit,
+    onEditClick: () -> Unit = {},
+) {
+    // Logic to format the date string
+    val dateText = when {
+        isToday(selectedDate) -> "Today"
+        isYesterday(selectedDate) -> "Yesterday"
+        else -> SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(selectedDate))
+    }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
@@ -174,6 +235,7 @@ fun DateSelector(onEditClick: () -> Unit = {}) {
                 .clip(RoundedCornerShape(12.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainer)
                 .padding(horizontal = 12.dp, vertical = 8.dp)
+                .clickable(onClick = onDateSelectorClick)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -182,7 +244,7 @@ fun DateSelector(onEditClick: () -> Unit = {}) {
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Today", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(dateText, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown")
             }
         }
@@ -474,7 +536,10 @@ fun RecentFoodItemRow(
 }
 
 @Composable
-fun RecentFoodsHeader(onClick: () -> Unit = {}) {
+fun FoodListHeader(
+    selectedDate: Long,
+    onClick: () -> Unit = {}
+) {
     Card(
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -482,7 +547,15 @@ fun RecentFoodsHeader(onClick: () -> Unit = {}) {
     ) {
         Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("🍽️ Terbadog hari ini", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text(
+                    text = if (isToday(selectedDate)) {
+                        "🍽️ Terbadog hari ini"
+                    } else {
+                        "🍽️ Daftar Terbadog"
+                    },
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowForward,
@@ -550,7 +623,10 @@ fun HomeScreenPreview() {
                 recentFoods = recentFoods
             ),
             onDeleteItem = {},
+            onNavigateToSettings = {},
             onNavigateToEditFood = {},
+            onDateSelected = {_, _, _ -> },
+            selectedDate = System.currentTimeMillis()
         )
     }
 }

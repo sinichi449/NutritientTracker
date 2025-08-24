@@ -1,10 +1,15 @@
 package net.sinichi.nutritienttracker.presentation.viewmodels
 
+import android.icu.util.Calendar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import net.sinichi.nutritienttracker.core.entities.FoodItem
@@ -13,31 +18,35 @@ import net.sinichi.nutritienttracker.core.repositories.FoodRepository
 import net.sinichi.nutritienttracker.core.repositories.UserProfileRepository
 import net.sinichi.nutritienttracker.presentation.states.HomeUiState
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(
     private val foodRepository: FoodRepository,
     private val userProfileRepository: UserProfileRepository,
 ): ViewModel() {
 
-    // Get a flow of today's food items from the repository
-    private val todaysFoodFlow = foodRepository.getFoodItemsForDay(System.currentTimeMillis())
+    // 1. State to hold the selected date, defaulting to today
+    private val _selectedDate = MutableStateFlow(System.currentTimeMillis())
+    val selectedDate: StateFlow<Long> = _selectedDate.asStateFlow()
 
-    // Get a flow of the 10 most recent food items
-    private val recentFoodsFlow = foodRepository.getRecentFoodItems(10)
+
+    // 2. The food flow now transforms based on the selected date
+    private val foodForSelectedDateFlow = _selectedDate.flatMapLatest { date ->
+        foodRepository.getFoodItemsForDay(date)
+    }
 
     // Get the user profile flow
     private val userProfileFlow = userProfileRepository.getUserProfile()
 
     // Combine the flows to create the final UI state
     val uiState: StateFlow<HomeUiState> = combine(
-        todaysFoodFlow,
-        recentFoodsFlow,
+        foodForSelectedDateFlow,
         userProfileFlow,
-    ) { todaysFood, recentFoods, userProfile ->
+    ) { dailyFood, userProfile ->
         // Calculate totals from today's food list
-        val caloriesConsumed = todaysFood.sumOf { it.calories }
-        val carbsConsumed = todaysFood.sumOf { it.carbs }
-        val proteinConsumed = todaysFood.sumOf { it.protein }
-        val fatConsumed = todaysFood.sumOf { it.fat }
+        val caloriesConsumed = dailyFood.sumOf { it.calories }
+        val carbsConsumed = dailyFood.sumOf { it.carbs }
+        val proteinConsumed = dailyFood.sumOf { it.protein }
+        val fatConsumed = dailyFood.sumOf { it.fat }
 
         // Calculate goals based on user profile
         val calorieGoal = userProfile.dailyGoalKcal
@@ -66,7 +75,8 @@ class HomeViewModel(
             calorieGoal = calorieGoal,
             dailyIntakeProgress = if (calorieGoal > 0) (caloriesConsumed.toFloat() / calorieGoal) else 0f,
             macroNutrients = macros,
-            recentFoods = recentFoods,
+            // The list now directly uses the food from the selected date
+            recentFoods = dailyFood,
             isLoading = false
         )
     }.stateIn(
@@ -74,6 +84,13 @@ class HomeViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = HomeUiState() // Start with a default loading state
     )
+
+    // 3. Function to update the selected date from the UI
+    fun onDateSelected(year: Int, month: Int, day: Int) {
+        val calendar = Calendar.getInstance()
+        calendar.set(year, month, day)
+        _selectedDate.value = calendar.timeInMillis
+    }
 
     fun deleteFoodItem(item: FoodItem) {
         viewModelScope.launch {

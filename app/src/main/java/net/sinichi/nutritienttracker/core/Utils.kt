@@ -1,6 +1,7 @@
-package net.sinichi.nutritienttracker.core.entities
+package net.sinichi.nutritienttracker.core
 
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -43,4 +44,19 @@ fun formatTimestampToAmPm(timestamp: Long): String {
     // if you want localized AM/PM markers.
     val sdf = SimpleDateFormat("h:mm a", Locale.US)
     return sdf.format(date)
+}
+
+// Helper functions to check if a date is today or yesterday
+fun isToday(timestamp: Long): Boolean {
+    val today = Calendar.getInstance()
+    val comparison = Calendar.getInstance().apply { timeInMillis = timestamp }
+    return today.get(Calendar.YEAR) == comparison.get(Calendar.YEAR) &&
+            today.get(Calendar.DAY_OF_YEAR) == comparison.get(Calendar.DAY_OF_YEAR)
+}
+
+fun isYesterday(timestamp: Long): Boolean {
+    val yesterday = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }
+    val comparison = Calendar.getInstance().apply { timeInMillis = timestamp }
+    return yesterday.get(Calendar.YEAR) == comparison.get(Calendar.YEAR) &&
+            yesterday.get(Calendar.DAY_OF_YEAR) == comparison.get(Calendar.DAY_OF_YEAR)
 }

@@ -149,8 +149,12 @@ class MainActivity : ComponentActivity() {
                         ) {
                             val homeViewModel: HomeViewModel = viewModel(factory = viewModelFactory)
                             val uiState by homeViewModel.uiState.collectAsState()
+                            val selectedDate by homeViewModel.selectedDate.collectAsState()
+
                             HomeScreen(
                                 uiState = uiState,
+                                selectedDate = selectedDate,
+                                onDateSelected = homeViewModel::onDateSelected,
                                 onDeleteItem = homeViewModel::deleteFoodItem,
                                 onNavigateToEditFood = { foodId ->
                                     navController.navigate(NavigationItem.Edit.createRoute(foodId))

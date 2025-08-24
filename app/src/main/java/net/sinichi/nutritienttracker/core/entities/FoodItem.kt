@@ -1,5 +1,6 @@
 package net.sinichi.nutritienttracker.core.entities
 
+import net.sinichi.nutritienttracker.core.calculateCalories
 import java.util.UUID
 
 data class FoodItem(
