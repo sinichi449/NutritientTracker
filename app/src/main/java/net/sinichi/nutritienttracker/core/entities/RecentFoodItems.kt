@@ -9,5 +9,5 @@ data class RecentFoodItem(
 ) {
     // Calories are now a calculated property
     val calories: Int
-        get() = (carbs * 4 + protein * 4 + fat * 9).toInt()
+        get() = calculateCalories(carbs, protein, fat).toInt()
 }

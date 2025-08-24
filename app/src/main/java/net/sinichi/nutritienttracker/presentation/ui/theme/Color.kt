@@ -1,4 +1,4 @@
-package net.sinichi.nutritienttracker.ui.theme
+package net.sinichi.nutritienttracker.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

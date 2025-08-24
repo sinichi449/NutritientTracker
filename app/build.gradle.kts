@@ -3,6 +3,17 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.hilt.gradle)
+    kotlin("kapt")
+}
+
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "com.squareup" && requested.name == "javapoet") {
+            useVersion("1.13.0") // Or the absolute latest javapoet version
+            because("Align javapoet versions to avoid conflicts") // Try 'because'
+        }
+    }
 }
 
 android {
@@ -40,6 +51,12 @@ android {
     }
 }
 
+kapt {
+    arguments {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -72,4 +89,12 @@ dependencies {
     implementation("androidx.compose.material:material-icons-core:1.6.0") // Or the version from your Compose BOM
     implementation("androidx.compose.material:material-icons-extended:1.6.0") // Or the version from your Compose BOM
 
+    // Hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+
+    // Room
+    implementation(libs.room.runtime)
+    kapt(libs.room.compiler)
+    implementation(libs.room.ktx)
 }
